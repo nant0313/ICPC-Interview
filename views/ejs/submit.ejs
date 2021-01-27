@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>date</title>
+    <style>
+        html,body{
+            width:100%;
+        }
+        table{
+            width: 100%;
+        }
+        .smt{
+            width:100%;
+        }
+        input[type=submit]{
+            display: block;
+            height: 40px;
+            width: 100%;
+            border:none;
+            border-bottom: 1px solid #f5f6f7;
+            background: #fff;
+            padding: 0 0 0 8px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="post" action="../senddata">
+    <table>
+        <thead></thead>
+        <tbody>
+            <% for(var i = 0;i < result.length; i++){ %>
+                <% if(result[i].id == id){ %>
+            <tr>
+                <td>
+                <input type="radio" name="date" checked value="<%= result[i].date %>">
+                </td>
+                <td>
+                    <%= result[i].date %>
+                </td>
+                <td>
+                현재 내 시간
+                </td>
+            </tr>
+            <% }else if(result[i].id == null){ %>
+                <tr>
+                    <td>
+                    <input type="radio" name="date" value="<%= result[i].date %>">
+                    </td>
+                    <td>
+                        <%= result[i].date %>
+                    </td>
+                    <td>
+                        1자리 남음
+                    </td>
+                </tr>
+            <% }else{ %>
+                <tr>
+                    <td>
+                    <input type="radio" name="date" disabled>
+                    </td>
+                    <td style="color:lightgray;">
+                        <%= result[i].date %>
+                    </td>
+                    <td>
+                        
+                    </td>
+                </tr>
+                <% } %>
+            <% } %>
+            <tr class="smt">
+                <td class="smt" colspan="3"><input type="submit"></td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+</body>
+
+</html>

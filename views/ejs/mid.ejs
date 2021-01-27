@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main</title>
+    <style>
+        div{
+            font-size: 13px;
+            text-align: center;
+        }
+        button:nth-child(2){
+            border-bottom:none;
+        }
+        button:last-child{
+            border-top: none;
+        }
+        button{
+            display: block;
+            height: 40px;
+            width: 100%;
+            border: 1px solid #f5f6f7;
+            background: #fff;
+            padding: 0 0 0 8px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div>내 면접 시간 : <%= date %> </div>
+    <% if(bul == 'y'){ %>
+        <button onclick="location.href='../submit'">면접 시간 신청</button>
+    <% }else{ %>
+        <button onclick="location.href='../submit'" disabled style="color:lightgray;">면접 시간 신청</button>
+    <% } %>
+    <button disabled onclick="alert('면접시간 10분전에 공지됩니다.');" style="color:lightgray;">줌 링크 확인</button>
+    <button onclick="location.href='../logout'">로그아웃</button>
+</body>
+</html>
