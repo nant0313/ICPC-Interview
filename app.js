@@ -43,17 +43,9 @@ connection.connect();
 connection.query('DELETE FROM sessions', (err, res, fields) => {
     console.log('CLEARED SESSION');
 });
-try {
-    const option = {
-        cert: fs.readFileSync(process.env.FULL_CHAIN_LOCATION),
-        key: fs.readFileSync(process.env.PRIV_KEY_LOCATION)
-    }
-    const server = https.createServer(option, app).listen(PORT, () => {
-        console.log('server has started');
-    })
-} catch (err) {
-    console.log(err);
-}
+const server = app.listen('8000', () => {
+    console.log('server has started');
+})
 // 이거 있어야 html render 가능
 app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
@@ -62,25 +54,28 @@ app.use('/views', static(path.join(__dirname, '/views')));
 app.use(body.json());
 app.use(body.urlencoded({ extended: true }));
 app.use('/logout', (req, res) => {
+    if (!req.session.user) return res.redirect("/main");
+
     console.log(req.session.user.id + '님이 로그아웃하셨습니다.')
     delete req.session.user;
     res.redirect('/');
 })
 app.use('/chkuser', (req, res) => {
-    connection.query('SELECT EXISTS (SELECT id FROM interview_target WHERE (id = ? AND mail = ?)) AS chk', [req.body.id, req.body.mail], (err, result, field) => {
+    connection.query('SELECT * FROM interview_target WHERE (id = ? AND mail = ?)', [req.body.id, req.body.mail], (err, result, field) => {
         if (err) {
             console.log(err)
             res.end('error has occured\nplease contact sogang icpc team');
         } else {
-            if (result[0].chk) {
+            if (result[0]) {
                 req.session.user = {};
-                req.session.user.id = req.body.id;
-                console.log(req.session.user.id + '님이 로그인하셨습니다.')
+                req.session.user.id = result[0].id;
+                req.session.user.name = result[0].name;
+                console.log(req.session.user.name + '님이 로그인하셨습니다.')
                 req.session.save(() => {
                     res.redirect('/main')
                 });
             } else {
-                console.log(req.body.id +' & '+req.body.mail+ '님이 로그인 실패하셨습니다.')
+                console.log(req.body.id + ' & ' + req.body.mail + '님이 로그인 실패하셨습니다.')
                 res.end('not interview target');
             }
         }
@@ -90,7 +85,7 @@ app.use('/submit', (req, res) => {
     if (!req.session.user) res.redirect('/')
     else {
         connection.query('SELECT * FROM interview', (err, result, field) => {
-            console.log(result)
+            // console.log(result)
             res.render('ejs/submit.ejs', {
                 id: req.session.user.id,
                 result: result
@@ -99,11 +94,13 @@ app.use('/submit', (req, res) => {
     }
 })
 app.use('/senddata', (req, res) => {
+    // console.log(req.body)
     if (!req.session.user) res.redirect('/')
     else {
         connection.query('UPDATE interview SET id = null WHERE id= ?', [req.session.user.id], (err, result, field) => {
-            connection.query('UPDATE interview SET id = ? WHERE (date = ? and (id is null OR id = ?))', [req.session.user.id, req.body.date, req.session.user.id], (err, result1, field) => {
-                res.redirect('/success')
+            connection.query('UPDATE interview SET id = ? WHERE (idx = ? and (id is null OR id = ?))', [req.session.user.id, req.body.date, req.session.user.id], (err, result1, field) => {
+                if (err) return console.log(err);
+                res.send(String(result1.changedRows))
             })
         })
     }
@@ -118,27 +115,33 @@ app.use('/main', (req, res) => {
     console.log(req.session)
     if (!req.session.user) res.redirect('/')
     else {
-        var bul;
-        var promised = new Date(2020,11,20,21,00,00);
-        if(promised.getTime() > new Date().getTime())
-            bul='n';
-        else
-            bul='y';
         connection.query('SELECT date FROM interview WHERE id = ?', [req.session.user.id], (err, result1, field) => {
             if (!result1.length) {
                 res.render('ejs/mid.ejs', {
-                    date: '없음',
-                    bul:bul
+                    date:'',
+                    bul: false
                 })
             } else {
-                res.render('ejs/mid.ejs', {
-                    date: result1[0].date,
-                    bul:bul
-                })
+                // 현 시간이 면접 시간+20분보다 클 경우
+                if (result1[0].date.getTime() > new Date().getTime() + 1000 * 60 * 20) {
+                    res.render('ejs/mid.ejs', {
+                        name: req.session.user.name,
+                        date: `${result1[0].date.getMonth()}월 ${result1[0].date.getDate()}일 ${result1[0].date.getHours()}시 ${result1[0].date.getMinutes()}분`,
+                        bul: false
+                    })
+                }else{
+                    res.render('ejs/mid.ejs', {
+                        name: req.session.user.name,
+                        date: `${result1[0].date.getMonth()}월 ${result1[0].date.getDate()}일 ${result1[0].date.getHours()}시 ${result1[0].date.getMinutes()}분`,
+                        bul: true
+                    })
+                }
+                
             }
         })
     }
 })
+
 app.use('/', (req, res) => {
     if (!req.session.user)
         res.render('ejs/login.ejs')
