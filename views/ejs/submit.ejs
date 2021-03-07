@@ -6,78 +6,179 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>date</title>
     <style>
-        html,body{
-            width:100%;
+        * {
+            -ms-user-select: none;
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-        table{
+
+        html {
             width: 100%;
         }
-        .smt{
-            width:100%;
+
+        body {
+            width: 100%;
+            margin: 3rem 0;
         }
-        input[type=submit]{
+
+        form {
+            width: 400px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        tr {
+            padding: 1rem 0;
+            cursor: pointer;
+        }
+
+        .submit__btn {
+            width: 100%;
+        }
+
+        input[type=submit] {
             display: block;
             height: 40px;
             width: 100%;
-            border:none;
+            border: none;
             border-bottom: 1px solid #f5f6f7;
             background: #fff;
             padding: 0 0 0 8px;
             font-size: 13px;
+            outline: none;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-    <form method="post" action="../senddata">
-    <table>
-        <thead></thead>
-        <tbody>
-            <% for(var i = 0;i < result.length; i++){ %>
-                <% if(result[i].id == id){ %>
-            <tr>
-                <td>
-                <input type="radio" name="date" checked value="<%= result[i].date %>">
-                </td>
-                <td>
-                    <%= result[i].date %>
-                </td>
-                <td>
-                현재 내 시간
-                </td>
-            </tr>
-            <% }else if(result[i].id == null){ %>
-                <tr>
-                    <td>
-                    <input type="radio" name="date" value="<%= result[i].date %>">
-                    </td>
-                    <td>
-                        <%= result[i].date %>
-                    </td>
-                    <td>
-                        1자리 남음
-                    </td>
-                </tr>
-            <% }else{ %>
-                <tr>
-                    <td>
-                    <input type="radio" name="date" disabled>
-                    </td>
-                    <td style="color:lightgray;">
-                        <%= result[i].date %>
-                    </td>
-                    <td>
-                        
-                    </td>
-                </tr>
-                <% } %>
-            <% } %>
-            <tr class="smt">
-                <td class="smt" colspan="3"><input type="submit"></td>
-            </tr>
-        </tbody>
-    </table>
-</form>
+    <form>
+        <table>
+            <thead></thead>
+            <tbody>
+                <% for(var i=0;i < result.length; i++){ %>
+                    <% if(result[i].id==id){ %>
+                        <tr>
+                            <td>
+                                <input type="radio" name="date" checked value="<%= result[i].idx %>">
+                            </td>
+                            <td>
+                                <span>
+                                    <%= result[i].date.getMonth() %>월
+                                </span>
+                                <span>
+                                    <%= result[i].date.getDate() %>일
+                                </span>
+                                <span>
+                                    <%= result[i].date.getHours() %>시
+                                </span>
+                                <span>
+                                    <%= result[i].date.getMinutes() %>분
+                                </span>
+                            </td>
+                            <td>
+                                현재 내 시간
+                            </td>
+                        </tr>
+                        <% }else if(result[i].id==null){ %>
+                            <tr>
+                                <td>
+                                    <input type="radio" name="date" value="<%= result[i].idx %>">
+                                </td>
+                                <td>
+                                    <span>
+                                        <%= result[i].date.getMonth() %>월
+                                    </span>
+                                    <span>
+                                        <%= result[i].date.getDate() %>일
+                                    </span>
+                                    <span>
+                                        <%= result[i].date.getHours() %>시
+                                    </span>
+                                    <span>
+                                        <%= result[i].date.getMinutes() %>분
+                                    </span>
+                                </td>
+                                <td>
+                                    1자리 남음
+                                </td>
+                            </tr>
+                            <% }else{ %>
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="date" disabled>
+                                    </td>
+                                    <td style="color:lightgray;">
+                                        <span>
+                                            <%= result[i].date.getMonth() %>월
+                                        </span>
+                                        <span>
+                                            <%= result[i].date.getDate() %>일
+                                        </span>
+                                        <span>
+                                            <%= result[i].date.getHours() %>시
+                                        </span>
+                                        <span>
+                                            <%= result[i].date.getMinutes() %>분
+                                        </span>
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                </tr>
+                                <% } %>
+                                    <% } %>
+                                        <tr class="submit__btn">
+                                            <td class="submit__btn" colspan="3"><input type="submit"></td>
+                                        </tr>
+            </tbody>
+        </table>
+    </form>
+    <script>
+        document.body.addEventListener("click", e => {
+            if (e.target.closest("tr"))
+                if (!e.target.closest("tr").classList.contains("submit__btn"))
+                    if (e.target.closest("tr").querySelector(`input[type="radio"]`).getAttribute("disabled") !== "")
+                        e.target.closest("tr").querySelector(`input[type="radio"]`).checked = true
+        })
+        document.querySelector(`input[type="submit"]`).addEventListener("click", e => {
+            e.preventDefault();
+            if (document.querySelector(`input[name="date"]:checked`))
+                submitDate();
+            else
+                alert('면접 날짜를 선택해주세요')
+        })
+        function submitDate() {
+            fetch("../senddata", {
+                method: "post",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: document.querySelector(`input[name="date"]:checked`).value
+                })
+            })
+                .then((res) => {
+                    return res.json();
+                })
+                .then(data => {
+                    if (data) {
+                        alert("정상적으로 신청되었습니다.")
+                        location.href = "../main"
+                    } else {
+                        alert("이미 신청된 시간입니다!")
+                        location.reload();
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        }
+    </script>
 </body>
 
 </html>
