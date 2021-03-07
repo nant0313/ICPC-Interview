@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login</title>
     <style>
-        body,html{
-            width:100%;
+        body,
+        html {
+            width: 100%;
         }
+
         input:focus {
             outline: none !important;
             /*border-color: #00c850;*/
@@ -23,31 +25,51 @@
             padding: 0 0 0 8px;
             font-size: 13px;
         }
-        input:first-child{
-            border-bottom:none;
+
+        input:first-child {
+            border-bottom: none;
         }
-        input:last-child{
-            width:calc(100% + 8px);
+
+        input:last-child {
+            width: calc(100% + 8px);
             border-top: none;
             text-align: center;
         }
-        div{
-            position:absolute;
-            width:90%;
-            left:50%;
-            top:40%;
-            transform: translate(-50%,-100%);
+
+        div {
+            position: absolute;
+            width: 90%;
+            left: 50%;
+            top: 40%;
+            transform: translate(-50%, -100%);
         }
     </style>
 </head>
 
-<body><div>
-    <form method="post" action="../chkuser">
-        <input type="text" name="id" placeholder="학번을 입력하세요" autocomplete="off">
-        <input type="text" name="mail" placeholder="지원시 제출한 이메일을 입력하세요" autocomplete="off">
-        <input type="submit" value="로그인">
-    </form>
-</div>
+<body>
+    <div>
+        <form method="post" action="../chkuser">
+            <input type="text" name="id" placeholder="학번을 입력하세요" autocomplete="off">
+            <input type="text" name="mail" placeholder="연락처를 입력하세요" autocomplete="off">
+            <input type="submit" value="로그인">
+        </form>
+    </div>
+    <script>
+        document.querySelector(`input[type="submit"]`).addEventListener("click", e => {
+            e.preventDefault();
+            let chk = true;
+            document.querySelectorAll("input").forEach(ele => {
+                if (!ele.value) {
+                    chk = false;
+                }
+            })
+            if (chk)
+                document.querySelector("form").submit();
+            else
+                return alert('모두 작성 해주세요');
+        })
+
+    </script>
 </body>
 
 </html>
